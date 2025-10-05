@@ -1,0 +1,53 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+application/logs/*
+
+# Cache
+application/cache/*
+
+# Uploads (you may want to keep some uploads, adjust as needed)
+uploads/lesson_files/*
+uploads/resource_files/*
+uploads/document/*
+
+# Backup files
+backups/*
+
+# Temporary files
+*.tmp
+*.temp
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Composer
+vendor/
+composer.lock
+
+# Node modules (if any)
+node_modules/
+
+# Database
+*.sql
+*.db
+
+# IDE specific
+*.sublime-project
+*.sublime-workspace

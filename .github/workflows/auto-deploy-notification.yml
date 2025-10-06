@@ -1,0 +1,49 @@
+name: Production Deployment Notification
+
+on:
+  push:
+    branches:
+      - prd
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Get Commit Info
+        id: commit_info
+        run: |
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          COMMIT_AUTHOR=$(git log -1 --pretty=%an)
+          COMMIT_SHA=$(git log -1 --pretty=%H)
+          COMMIT_SHORT_SHA=$(git log -1 --pretty=%h)
+          
+          echo "message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
+          echo "author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
+          echo "sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          echo "short_sha=$COMMIT_SHORT_SHA" >> $GITHUB_OUTPUT
+
+      - name: Create Deployment Summary
+        run: |
+          echo "# 🚀 Production Deployment Ready" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Deployment Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: \`prd\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ steps.commit_info.outputs.short_sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Author**: ${{ steps.commit_info.outputs.author }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Message**: ${{ steps.commit_info.outputs.message }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "Deploy to Hostinger by running:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "cd /path/to/your/project" >> $GITHUB_STEP_SUMMARY
+          echo "git checkout prd" >> $GITHUB_STEP_SUMMARY
+          echo "git pull origin prd" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ **Remember to backup your database before deploying!**" >> $GITHUB_STEP_SUMMARY

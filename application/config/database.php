@@ -75,13 +75,13 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => '82.180.140.4',
+	'hostname' => 'localhost',
 	'username' => 'u694807547_ci_dev_mds_umi',
 	'password' => 'Ramdeo321#@!',
 	'database' => 'u694807547_mds_ci', 
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
-	'pconnect' => TRUE,
+	'pconnect' => FALSE,
 	'db_debug' => TRUE,
 	'cache_on' => FALSE,
 	'cachedir' => '',

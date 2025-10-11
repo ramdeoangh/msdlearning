@@ -25,6 +25,14 @@ uploads/lesson_files/*
 uploads/resource_files/*
 uploads/document/*
 
+# Video files (large files)
+video/
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.wmv
+
 # Backup files
 backups/*
 

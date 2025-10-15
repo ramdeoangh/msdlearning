@@ -4398,24 +4398,35 @@ class Crud_model extends CI_Model
         $lesson_total_duration = $this->db->get_where('lesson', array('id' => $data['watched_lesson_id']))->row('duration');
         $lesson_total_duration = explode(':', $lesson_total_duration);
         $lesson_total_seconds = ($lesson_total_duration[0] * 3600) + ($lesson_total_duration[1] * 60) + $lesson_total_duration[2];
-        $current_total_seconds = count($watched_duration_arr) * 5;
+        // Fix: Use actual current duration instead of count * 5
+        $current_total_seconds = $current_duration;
 
+        // Debug: Log completion check details
+        error_log("Drip content check - Current: {$current_total_seconds}s, Total: {$lesson_total_seconds}s, Role: {$drip_content_settings['lesson_completion_role']}");
+        
         if ($drip_content_settings['lesson_completion_role'] == 'duration') {
             if ($current_total_seconds >= $drip_content_settings['minimum_duration']) {
                 $is_completed = 1;
+                error_log("Lesson completed by duration: {$current_total_seconds}s >= {$drip_content_settings['minimum_duration']}s");
             } elseif (($current_total_seconds + 4) >= $lesson_total_seconds) {
                 $is_completed = 1;
+                error_log("Lesson completed by video end: " . ($current_total_seconds + 4) . "s >= {$lesson_total_seconds}s");
             }
         } else {
             $required_duration = ($lesson_total_seconds / 100) * $drip_content_settings['minimum_percentage'];
             if ($current_total_seconds >= $required_duration) {
                 $is_completed = 1;
+                error_log("Lesson completed by percentage: {$current_total_seconds}s >= {$required_duration}s ({$drip_content_settings['minimum_percentage']}%)");
             } elseif (($current_total_seconds + 4) >= $lesson_total_seconds) {
                 $is_completed = 1;
+                error_log("Lesson completed by video end (percentage): " . ($current_total_seconds + 4) . "s >= {$lesson_total_seconds}s");
             }
         }
 
         if ($is_completed == 1) {
+            // Debug: Log lesson completion
+            error_log("Lesson {$data['watched_lesson_id']} marked as completed for user {$data['watched_student_id']}");
+            
             $query = $this->db->get_where('watch_histories', array('course_id' => $data['watched_course_id'], 'student_id' => $data['watched_student_id']));
             $course_progress = $query->row('course_progress');
 

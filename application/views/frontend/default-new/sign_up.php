@@ -45,7 +45,7 @@
                             </div>
                         </div>
 
-                        <?php if(get_settings('allow_instructor')): ?>
+                        <!-- <?php if(get_settings('allow_instructor')): ?>
                             <div class="mb-4">
                                 <input id="instructor" type="checkbox" onchange="$('#become-instructor-fields').toggle()" name="instructor" value="yes" <?php echo isset($_GET['instructor']) ? 'checked':''; ?>>
                                 <label for="instructor"><?php echo get_phrase('Apply to Become an instructor'); ?></label>
@@ -73,7 +73,7 @@
                                     </div>
                                 </div>
                             </div>
-                        <?php endif; ?>
+                        <?php endif; ?> -->
 
                         <?php if(get_frontend_settings('recaptcha_status')): ?>
                             <div class="g-recaptcha" data-sitekey="<?php echo get_frontend_settings('recaptcha_sitekey'); ?>"></div>

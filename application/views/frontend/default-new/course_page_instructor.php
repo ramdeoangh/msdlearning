@@ -73,9 +73,9 @@
 
     // Toggle the text between "Follow" and "Unfollow"
     if (isFollowing) {
-        $(this).text("<?php echo get_phrase('Follow'); ?>");
+        $(this).text("<?php echo addslashes(get_phrase('Follow')); ?>");
     } else {
-        $(this).text("<?php echo get_phrase('Unfollow'); ?>");
+        $(this).text("<?php echo addslashes(get_phrase('Unfollow')); ?>");
     }
 });
 
@@ -87,16 +87,16 @@ function toggleFollow(instructor_id, element) {
         dataType: 'json', 
         data: {
             instructor_id: instructor_id,
-            user_id: <?php echo $this->session->userdata('user_id'); ?>
+            user_id: <?php echo $this->session->userdata('user_id') ?: 'null'; ?>
         },
         success: function(response) {
             var btn = $(element).find('span');
             if (response.status === 'followed') {
-                btn.text('<?php echo get_phrase('Unfollow'); ?>');
+                btn.text('<?php echo addslashes(get_phrase('Unfollow')); ?>');
                 btn.removeClass('btn-primary');
                 btn.addClass('btn-fill');
             } else if (response.status === 'unfollowed') {
-                btn.text('<?php echo get_phrase('Follow'); ?>');
+                btn.text('<?php echo addslashes(get_phrase('Follow')); ?>');
                 btn.removeClass('btn-fill');
                 btn.addClass('btn-primary');
             }

@@ -1663,6 +1663,64 @@ class Home extends CI_Controller
         echo $this->crud_model->update_watch_history_with_duration();
     }
 
+    //Get next lesson for auto-progression
+    function get_next_lesson()
+    {
+        $course_id = $this->input->post('course_id');
+        $current_lesson_id = $this->input->post('current_lesson_id');
+        
+        // Debug logging
+        error_log("get_next_lesson called - Course ID: $course_id, Current Lesson ID: $current_lesson_id");
+        
+        // Get lessons for the given course
+        $lesson_list = $this->crud_model->get_lessons('course', $course_id)->result_array();
+        error_log("Total lessons in course: " . count($lesson_list));
+        
+        // Find the current lesson position in the list
+        $current_index = -1;
+        foreach ($lesson_list as $index => $lesson) {
+            if ($lesson['id'] == $current_lesson_id) {
+                $current_index = $index;
+                error_log("Current lesson found at index: $current_index");
+                break;
+            }
+        }
+        
+        // If the lesson is found and there's a next lesson
+        if ($current_index != -1 && isset($lesson_list[$current_index + 1])) {
+            $next_lesson_id = $lesson_list[$current_index + 1]['id'];
+            
+            // Check if the next lesson is unlocked (for drip content)
+            $course_details = $this->crud_model->get_course_by_id($course_id)->row_array();
+            if ($course_details['enable_drip_content'] == 1) {
+                $user_id = $this->session->userdata('user_id');
+                $watch_history = $this->crud_model->get_watch_histories($user_id, $course_id)->row_array();
+                $completed_lessons = array();
+                if(is_array($watch_history) && !empty($watch_history['completed_lesson'])) {
+                    $completed_lessons = json_decode($watch_history['completed_lesson'], true);
+                }
+                
+                // Check if current lesson is completed (required for next lesson to be unlocked)
+                error_log("Completed lessons: " . json_encode($completed_lessons));
+                error_log("Current lesson ID in completed lessons: " . (in_array($current_lesson_id, $completed_lessons) ? 'YES' : 'NO'));
+                
+                if (in_array($current_lesson_id, $completed_lessons)) {
+                    error_log("Next lesson unlocked: $next_lesson_id");
+                    echo json_encode(array('next_lesson_id' => $next_lesson_id));
+                } else {
+                    error_log("Next lesson locked - current lesson not completed");
+                    echo json_encode(array('next_lesson_id' => null));
+                }
+            } else {
+                // Drip content is disabled, next lesson is always available
+                echo json_encode(array('next_lesson_id' => $next_lesson_id));
+            }
+        } else {
+            // No next lesson found
+            echo json_encode(array('next_lesson_id' => null));
+        }
+    }
+
     // Mark this lesson as completed codes
     function update_watch_history_manually()
     {

@@ -141,6 +141,7 @@
 
     // Function to start countdown
     function startCountdown() {
+        console.log('Starting countdown...');
         let countdown = 5; // Countdown set to 5 seconds
         countdownElement.textContent = countdown;
         overlay.style.visibility = 'visible';
@@ -164,11 +165,17 @@
 
                 let lesson_id = '<?php echo $lesson_details['id']; ?>';
                 let course_id = '<?php echo $course_details['id']; ?>';
-                var next_lesson_id = '<?php echo next_lesson($course_details['id'], $lesson_details['id']); ?>';
 
-                if (next_lesson_id) {
-                    const url = '<?php echo site_url("home/lesson/"); ?>' + '/' + '<?php echo slugify($course_details['title']); ?>' + '/' + course_id + '/' + next_lesson_id;
+                // Use stored next lesson ID
+                if (nextLessonId && !pageRefreshed) {
+                    pageRefreshed = true; // Prevent multiple redirects
+                    const url = '<?php echo site_url("home/lesson/"); ?>' + '/' + '<?php echo slugify($course_details['title']); ?>' + '/' + course_id + '/' + nextLessonId;
+                    console.log('Countdown complete - Redirecting to next lesson:', url);
+                    console.log('Next lesson ID:', nextLessonId);
                     window.location.href = url; // Redirect to the next lesson
+                } else {
+                    console.log('No next lesson ID stored or already redirected');
+                    console.log('nextLessonId:', nextLessonId, 'pageRefreshed:', pageRefreshed);
                 }
             }
 
@@ -178,11 +185,83 @@
     // Event listener for video end
     if (typeof player === 'object' && player !== null) {
         player.on('ended', () => {
-            console.log('Video has ended');
-            var next_lesson_id = '<?php echo next_lesson($course_details['id'], $lesson_details['id']); ?>';
-            if (next_lesson_id) {
-                startCountdown(); // Start showing countdown when video ends
-            }
+            console.log('Video has ended - Starting completion check...');
+            
+            // Force update watch history to ensure lesson completion is recorded
+            $.ajax({
+                type: 'POST',
+                url: '<?php echo site_url('home/update_watch_history_with_duration'); ?>',
+                data: {
+                    lesson_id: lesson_id,
+                    course_id: course_id,
+                    current_duration: player.duration // Use full video duration
+                },
+                success: function(response) {
+                    try {
+                        var responseVal = JSON.parse(response);
+                        console.log('Final watch history update:', responseVal);
+                        
+                        if (responseVal.is_completed == 1 && !pageRefreshed) {
+                            console.log('Lesson marked as completed on video end');
+                            
+                            // Get next lesson dynamically via AJAX
+                            $.ajax({
+                                type: 'POST',
+                                url: '<?php echo site_url('home/get_next_lesson'); ?>',
+                                data: {
+                                    course_id: course_id,
+                                    current_lesson_id: lesson_id
+                                },
+                                success: function(nextResponse) {
+                                    try {
+                                        var nextData = JSON.parse(nextResponse);
+                                        console.log('Next lesson response:', nextData);
+                                        console.log('Raw next lesson response:', nextResponse);
+                                        
+                                        if (nextData.next_lesson_id && nextData.next_lesson_id != 'null') {
+                                            console.log('Next lesson found:', nextData.next_lesson_id);
+                                            nextLessonId = nextData.next_lesson_id; // Store for countdown
+                                            console.log('Starting countdown for next lesson...');
+                                            startCountdown(); // Start showing countdown when video ends
+                                        } else {
+                                            // No next lesson, just refresh to update progress
+                                            console.log('No next lesson available, refreshing page to update progress...');
+                                            setTimeout(function() {
+                                                location.reload();
+                                            }, 1000);
+                                        }
+                                    } catch (e) {
+                                        console.error('Error parsing next lesson response:', e);
+                                        // Fallback: refresh page
+                                        setTimeout(function() {
+                                            location.reload();
+                                        }, 1000);
+                                    }
+                                },
+                                error: function() {
+                                    console.error('Error getting next lesson');
+                                    // Fallback: refresh page
+                                    setTimeout(function() {
+                                        location.reload();
+                                    }, 1000);
+                                }
+                            });
+                        } else if (responseVal.is_completed == 1) {
+                            console.log('Lesson already completed, no action needed');
+                        } else {
+                            console.log('Lesson not marked as completed. Progress:', responseVal.course_progress);
+                        }
+                    } catch (e) {
+                        console.error('Error parsing final watch history response:', e);
+                        console.log('Raw response:', response);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX error in final watch history update:', error);
+                    console.log('Status:', status);
+                    console.log('Response:', xhr.responseText);
+                }
+            });
         });
     }
 
@@ -201,11 +280,28 @@
     var currentProgress = '<?php echo lesson_progress($lesson_details['id']); ?>';
     let previousSavedDuration = 0;
     let currentDuration = 0;
+    let lessonCompleted = false; // Flag to prevent multiple refreshes
+    let pageRefreshed = false; // Flag to prevent multiple page refreshes
+    let nextLessonId = null; // Store next lesson ID for countdown
+    
+    // Check if lesson is already completed on page load
+    <?php 
+    $watch_history = $this->crud_model->get_watch_histories($this->session->userdata('user_id'), $course_details['id'])->row_array();
+    $completed_lessons = array();
+    if(is_array($watch_history) && !empty($watch_history['completed_lesson'])) {
+        $completed_lessons = json_decode($watch_history['completed_lesson'], true);
+    }
+    $is_already_completed = in_array($lesson_details['id'], $completed_lessons);
+    ?>
+    <?php if($is_already_completed): ?>
+        lessonCompleted = true; // Lesson is already completed
+        console.log('Lesson is already completed');
+    <?php endif; ?>
 
     if (typeof player === 'object' && player !== null) {
         setInterval(function() {
             currentDuration = parseInt(player.currentTime);
-            if (lesson_id && course_id && (currentDuration % 5) == 0 && previousSavedDuration != currentDuration) {
+            if (lesson_id && course_id && (currentDuration % 5) == 0 && previousSavedDuration != currentDuration && !lessonCompleted) {
                 previousSavedDuration = currentDuration;
 
                 $.ajax({
@@ -217,9 +313,26 @@
                         current_duration: currentDuration
                     },
                     success: function(response) {
-                        var responseVal = JSON.parse(response);
-                        console.log(responseVal);
-                        console.log(responseVal.course_progress);
+                        try {
+                            var responseVal = JSON.parse(response);
+                            console.log('Watch history update response:', responseVal);
+                            console.log('Course progress:', responseVal.course_progress);
+                            console.log('Lesson completed:', responseVal.is_completed);
+                            
+                            // Only set completion flag, don't refresh during video playback
+                            if (responseVal.is_completed == 1 && !lessonCompleted) {
+                                lessonCompleted = true;
+                                console.log('Lesson marked as completed during playback');
+                            }
+                        } catch (e) {
+                            console.error('Error parsing watch history response:', e);
+                            console.log('Raw response:', response);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX error updating watch history:', error);
+                        console.log('Status:', status);
+                        console.log('Response:', xhr.responseText);
                     }
                 });
             }

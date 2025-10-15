@@ -73,20 +73,23 @@ defined('BASEPATH') or exit('No direct script access allowed');
 $active_group = 'default';
 $query_builder = TRUE;
 
+// Load environment-specific database configuration
+$env_db_config = include(APPPATH . 'config/database_env.php');
+
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => '82.180.140.4',
-	'username' => 'u694807547_ci_dev_mds_umi',
-	'password' => 'Ramdeo321#@!',
-	'database' => 'u694807547_mds_ci', 
-	'dbdriver' => 'mysqli',
-	'dbprefix' => '',
+	'hostname' => $env_db_config['hostname'],
+	'username' => $env_db_config['username'],
+	'password' => $env_db_config['password'],
+	'database' => $env_db_config['database'], 
+	'dbdriver' => getenv('DB_DRIVER') ?: 'mysqli',
+	'dbprefix' => getenv('DB_PREFIX') ?: '',
 	'pconnect' => FALSE,
 	'db_debug' => (ENVIRONMENT !== 'production'),
 	'cache_on' => FALSE,
 	'cachedir' => '',
-	'char_set' => 'utf8',
-	'dbcollat' => 'utf8_general_ci',
+	'char_set' => getenv('DB_CHARSET') ?: 'utf8',
+	'dbcollat' => getenv('DB_COLLATION') ?: 'utf8_general_ci',
 	'swap_pre' => '',
 	'encrypt' => FALSE,
 	'compress' => FALSE,

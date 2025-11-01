@@ -13,7 +13,7 @@ name: "msd learning CodeQL Advanced"
 
 on: 
   pull_request:
-    branches: [ "prd" ]
+    branches: [ "main", "prd" ]
   schedule:
     - cron: '33 6 * * 1'
 

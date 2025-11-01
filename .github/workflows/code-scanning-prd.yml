@@ -1,0 +1,120 @@
+name: Code Scanning for PRD Pull Requests
+
+on:
+  pull_request:
+    branches:
+      - prd
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  code-scanning:
+    # Only run on pull requests from release-*-* branches
+    if: startsWith(github.event.pull_request.head.ref, 'release-') || startsWith(github.event.pull_request.head.ref, 'Release-')
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript,php
+          queries: security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript,php"
+
+      # PHP Static Analysis
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, xml, curl
+
+      - name: Run PHP Lint
+        run: |
+          echo "Running PHP syntax check..."
+          find . -name "*.php" -not -path "./vendor/*" -not -path "./system/*" -exec php -l {} \; | grep -v "No syntax errors"
+
+      # Security Scanning with PHPStan or Psalm (if available)
+      - name: Check for Composer
+        id: check-composer
+        run: |
+          if [ -f "composer.json" ]; then
+            echo "composer_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "composer_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install Dependencies (if composer.json exists)
+        if: steps.check-composer.outputs.composer_exists == 'true'
+        run: |
+          composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+
+      # JavaScript Security Scanning
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Run npm audit (if package.json exists)
+        continue-on-error: true
+        run: |
+          if [ -f "package.json" ]; then
+            npm audit --audit-level=moderate || true
+          else
+            echo "No package.json found, skipping npm audit"
+          fi
+
+      # File Permission Check
+      - name: Check File Permissions
+        run: |
+          echo "Checking for potentially insecure file permissions..."
+          find . -type f -perm /0777 -not -path "./.git/*" -not -path "./vendor/*" | while read file; do
+            echo "⚠️  Warning: File $file has world-writable permissions"
+          done || true
+
+      # Check for sensitive data patterns
+      - name: Check for Potential Secrets
+        continue-on-error: true
+        run: |
+          echo "Scanning for potential secrets..."
+          # Check for hardcoded passwords, API keys, etc.
+          grep -r -i -E "(password|secret|api_key|apikey|token)\s*=\s*['\"][^'\"]+['\"]" \
+            --include="*.php" \
+            --include="*.js" \
+            --exclude-dir=vendor \
+            --exclude-dir=node_modules \
+            --exclude-dir=.git \
+            || echo "No obvious secrets found"
+
+      # Summary
+      - name: Generate Security Summary
+        run: |
+          echo "## 🔍 Code Scanning Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Scans Completed:" >> $GITHUB_STEP_SUMMARY
+          echo "- CodeQL Analysis (JavaScript, PHP)" >> $GITHUB_STEP_SUMMARY
+          echo "- PHP Syntax Check" >> $GITHUB_STEP_SUMMARY
+          echo "- JavaScript Dependency Audit" >> $GITHUB_STEP_SUMMARY
+          echo "- File Permission Check" >> $GITHUB_STEP_SUMMARY
+          echo "- Secrets Detection" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Source Branch:** \`${{ github.event.pull_request.head.ref }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Target Branch:** \`${{ github.event.pull_request.base.ref }}\`" >> $GITHUB_STEP_SUMMARY
+

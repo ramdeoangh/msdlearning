@@ -130,9 +130,38 @@ class Login extends CI_Controller
         $data['last_name']  = html_escape($this->input->post('last_name'));
         $data['email']  = html_escape($this->input->post('email'));
         $data['password']  = sha1($this->input->post('password'));
+        
+        // New mandatory fields
+        $data['location'] = html_escape($this->input->post('location'));
+        $data['designation'] = html_escape($this->input->post('designation'));
+        $data['phone'] = html_escape($this->input->post('phone'));
+        $data['city'] = html_escape($this->input->post('city'));
+        $data['state'] = html_escape($this->input->post('state'));
+        $data['pincode'] = html_escape($this->input->post('pincode'));
 
-        if (empty($data['first_name']) || empty($data['last_name']) || empty($data['email']) || empty($data['password'])) {
+        // Validate all mandatory fields
+        if (empty($data['first_name']) || empty($data['last_name']) || empty($data['email']) || empty($data['password']) ||
+            empty($data['location']) || empty($data['designation']) || empty($data['phone']) || 
+            empty($data['city']) || empty($data['state']) || empty($data['pincode'])) {
             $this->session->set_flashdata('error_message', site_phrase('your_sign_up_form_is_empty') . '. ' . site_phrase('fill_out_the_form with_your_valid_data'));
+            redirect(site_url('sign_up'), 'refresh');
+        }
+        
+        // Validate dropdown selections (should not be empty or invalid)
+        if ($data['location'] == '' || $data['designation'] == '' || $data['state'] == '') {
+            $this->session->set_flashdata('error_message', get_phrase('Please select valid options for location, designation, and state'));
+            redirect(site_url('sign_up'), 'refresh');
+        }
+        
+        // Validate phone number format (10 digits)
+        if (!preg_match('/^[0-9]{10}$/', $data['phone'])) {
+            $this->session->set_flashdata('error_message', get_phrase('Please enter a valid 10-digit phone number'));
+            redirect(site_url('sign_up'), 'refresh');
+        }
+        
+        // Validate pincode format (6 digits)
+        if (!preg_match('/^[0-9]{6}$/', $data['pincode'])) {
+            $this->session->set_flashdata('error_message', get_phrase('Please enter a valid 6-digit pincode'));
             redirect(site_url('sign_up'), 'refresh');
         }
 

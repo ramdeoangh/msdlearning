@@ -89,6 +89,66 @@
                                                 <input type="text" class="form-control" id="address" name="address">
                                             </div>
                                         </div>
+
+                                        <div class="form-group row mb-3">
+                                            <label class="col-md-3 col-form-label" for="location"><?php echo get_phrase('Location'); ?><span class="required">*</span></label>
+                                            <div class="col-md-9">
+                                                <select class="form-control" id="location" name="location" required>
+                                                    <option value=""><?php echo get_phrase('Select Location'); ?></option>
+                                                    <option value="PHC">PHC</option>
+                                                    <option value="Sub-PHC">Sub-PHC</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row mb-3">
+                                            <label class="col-md-3 col-form-label" for="designation"><?php echo get_phrase('Designation'); ?><span class="required">*</span></label>
+                                            <div class="col-md-9">
+                                                <select class="form-control" id="designation" name="designation" required>
+                                                    <option value=""><?php echo get_phrase('Select Designation'); ?></option>
+                                                    <option value="ANM">ANM</option>
+                                                    <option value="MPW">MPW</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row mb-3">
+                                            <label class="col-md-3 col-form-label" for="phone"><?php echo get_phrase('Phone Number'); ?><span class="required">*</span></label>
+                                            <div class="col-md-9">
+                                                <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{10}" maxlength="10" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row mb-3">
+                                            <label class="col-md-3 col-form-label" for="city"><?php echo get_phrase('City'); ?><span class="required">*</span></label>
+                                            <div class="col-md-9">
+                                                <input type="text" class="form-control" id="city" name="city" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row mb-3">
+                                            <label class="col-md-3 col-form-label" for="state"><?php echo get_phrase('State'); ?><span class="required">*</span></label>
+                                            <div class="col-md-9">
+                                                <select class="form-control" id="state" name="state" required>
+                                                    <option value=""><?php echo get_phrase('Select State'); ?></option>
+                                                    <?php 
+                                                    $this->load->helper('indian_states');
+                                                    $indian_states = get_indian_states();
+                                                    asort($indian_states);
+                                                    foreach($indian_states as $code => $state): 
+                                                    ?>
+                                                        <option value="<?php echo html_escape($state); ?>"><?php echo html_escape($state); ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row mb-3">
+                                            <label class="col-md-3 col-form-label" for="pincode"><?php echo get_phrase('Pincode'); ?><span class="required">*</span></label>
+                                            <div class="col-md-9">
+                                                <input type="text" class="form-control" id="pincode" name="pincode" pattern="[0-9]{6}" maxlength="6" required>
+                                            </div>
+                                        </div>
                                         
                                         <div class="form-group row mb-3">
                                             <label class="col-md-3 col-form-label" for="user_image"><?php echo get_phrase('user_image'); ?></label>

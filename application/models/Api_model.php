@@ -478,6 +478,15 @@ class Api_model extends CI_Model
 		$data['last_name'] = $_POST['last_name'];
 	    $data['email'] = $_POST['email'];
 	    $data['password'] = sha1($_POST['password']);
+	    
+	    // New mandatory fields
+	    $data['location'] = isset($_POST['location']) ? $_POST['location'] : '';
+	    $data['designation'] = isset($_POST['designation']) ? $_POST['designation'] : '';
+	    $data['phone'] = isset($_POST['phone']) ? $_POST['phone'] : '';
+	    $data['city'] = isset($_POST['city']) ? $_POST['city'] : '';
+	    $data['state'] = isset($_POST['state']) ? $_POST['state'] : '';
+	    $data['pincode'] = isset($_POST['pincode']) ? $_POST['pincode'] : '';
+	    
 	    $verification_code = rand(100000, 999999);
 	    $data['verification_code'] = $verification_code;
 
@@ -498,6 +507,34 @@ class Api_model extends CI_Model
         $data['role_id']  = 2;
 
         $data['payment_keys'] = json_encode(array());
+
+        // Validate new mandatory fields
+        if (empty($data['location']) || empty($data['designation']) || empty($data['phone']) || 
+            empty($data['city']) || empty($data['state']) || empty($data['pincode'])) {
+            $response['message'] = 'All fields are required: location, designation, phone, city, state, pincode';
+            $response['status'] = 400;
+            $response['validity'] = false;
+            echo json_encode($response);
+            return;
+        }
+        
+        // Validate phone number format (10 digits)
+        if (!preg_match('/^[0-9]{10}$/', $data['phone'])) {
+            $response['message'] = 'Please enter a valid 10-digit phone number';
+            $response['status'] = 400;
+            $response['validity'] = false;
+            echo json_encode($response);
+            return;
+        }
+        
+        // Validate pincode format (6 digits)
+        if (!preg_match('/^[0-9]{6}$/', $data['pincode'])) {
+            $response['message'] = 'Please enter a valid 6-digit pincode';
+            $response['status'] = 400;
+            $response['validity'] = false;
+            echo json_encode($response);
+            return;
+        }
 
         $validity = $this->user_model->check_duplication('on_create', $data['email']);
         if($validity === 'unverified_user' || $validity == true) {

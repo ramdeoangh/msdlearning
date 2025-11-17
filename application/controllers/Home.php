@@ -580,7 +580,7 @@ class Home extends CI_Controller
                 
                 if($certificate_check->num_rows() > 0) {
                     $certificate_identifier = $certificate_check->row('shareable_url');
-                    redirect(site_url('addons/certificate/generate_certificate/'.$certificate_identifier), 'refresh');
+                    redirect(site_url('certificate/'.$certificate_identifier), 'refresh');
                 } else {
                     $this->session->set_flashdata('error_message', get_phrase('certificate_not_found'));
                     redirect(site_url('home/profile/user_certificates'), 'refresh');
@@ -607,7 +607,7 @@ class Home extends CI_Controller
             $certificate_check = $this->db->get_where('certificates', array('shareable_url' => $certificate_identifier, 'student_id' => $user_id));
             
             if($certificate_check->num_rows() > 0) {
-                redirect(site_url('addons/certificate/generate_certificate/'.$certificate_identifier), 'refresh');
+                redirect(site_url('certificate/'.$certificate_identifier), 'refresh');
             } else {
                 $this->session->set_flashdata('error_message', get_phrase('invalid_certificate'));
                 redirect(site_url('home/profile/user_certificates'), 'refresh');

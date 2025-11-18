@@ -55,11 +55,11 @@
                         <div class="row">
                             <!-- Location and Designation - Side by Side -->
                             <div class="col-md-6 mb-3">
-                                <h5><?php echo get_phrase('Location'); ?> <span class="text-danger">*</span></h5>
+                                <h5><?php echo get_phrase('select_workplace'); ?> <span class="text-danger">*</span></h5>
                                 <div class="position-relative">
                                     <i class="fa-solid fa-location-dot"></i>
                                     <select class="form-control" id="location" name="location" required>
-                                        <option value=""><?php echo get_phrase('Select Location'); ?></option>
+                                        <option value=""><?php echo get_phrase('select_workplace'); ?></option>
                                         <option value="PHC">PHC</option>
                                         <option value="Sub-PHC">Sub-PHC</option>
                                     </select>
@@ -87,23 +87,14 @@
                                     <input class="form-control" id="phone" type="tel" name="phone" placeholder="<?php echo get_phrase('Enter your phone number'); ?>" pattern="[0-9]{10}" maxlength="10" required>
                                 </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <h5><?php echo get_phrase('City'); ?> <span class="text-danger">*</span></h5>
-                                <div class="position-relative">
-                                    <i class="fa-solid fa-city"></i>
-                                    <input class="form-control" id="city" type="text" name="city" placeholder="<?php echo get_phrase('Enter your city'); ?>" required>
-                                </div>
-                            </div>
-                        </div>
+                        
 
-                        <div class="row">
-                            <!-- State and Pincode - Side by Side -->
                             <div class="col-md-6 mb-3">
                                 <h5><?php echo get_phrase('State'); ?> <span class="text-danger">*</span></h5>
                                 <div class="position-relative">
                                     <i class="fa-solid fa-map"></i>
                                     <select class="form-control" id="state" name="state" required>
-                                        <option value=""><?php echo get_phrase('Select State'); ?></option>
+                                        <option value=""><?php echo get_phrase('select_state'); ?></option>
                                         <?php 
                                         $indian_states = get_indian_states();
                                         asort($indian_states); // Sort alphabetically
@@ -111,6 +102,19 @@
                                         ?>
                                             <option value="<?php echo html_escape($state); ?>"><?php echo html_escape($state); ?></option>
                                         <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- City and Pincode - Side by Side -->
+                            <div class="col-md-6 mb-3" id="city_dropdown_container">
+                                <h5><?php echo get_phrase('City'); ?> <span class="text-danger">*</span></h5>
+                                <div class="position-relative">
+                                    <i class="fa-solid fa-city"></i>
+                                    <select class="form-control" id="city" name="city">
+                                        <option value=""><?php echo get_phrase('select_city'); ?></option>
                                     </select>
                                 </div>
                             </div>
@@ -198,4 +202,41 @@
     function onSignupSubmit(token) {
         document.getElementById("signup-form").submit();
     }
+
+    // Handle state selection and city dropdown
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cities data for Maharashtra
+        const stateCities = {
+            'Maharashtra': ['Nandurbar', 'Palghar', 'Washim']
+        };
+
+        const stateSelect = document.getElementById('state');
+        const cityContainer = document.getElementById('city_dropdown_container');
+        const citySelect = document.getElementById('city');
+
+        if (stateSelect) {
+            stateSelect.addEventListener('change', function() {
+                const selectedState = this.value;
+                
+                // Clear previous city options
+                citySelect.innerHTML = '<option value=""><?php echo get_phrase('select_city'); ?></option>';
+                
+                // Show/hide city dropdown based on state selection
+                if (selectedState && stateCities[selectedState]) {
+                    // Populate cities for the selected state
+                    stateCities[selectedState].forEach(function(city) {
+                        const option = document.createElement('option');
+                        option.value = city;
+                        option.textContent = city;
+                        citySelect.appendChild(option);
+                    });
+                    
+                    citySelect.setAttribute('required', 'required');
+                } else {
+                    citySelect.removeAttribute('required');
+                    citySelect.value = '';
+                }
+            });
+        }
+    });
 </script>

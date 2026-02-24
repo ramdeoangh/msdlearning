@@ -1,10 +1,28 @@
 <?php
     $user_data = $this->db->get_where('users', array('id' => $user_id))->row_array();
+        
     $social_links = json_decode($user_data['social_links'], true);
+    
+    // Ensure social_links is an array to avoid warnings
+    if (!is_array($social_links)) {
+        $social_links = array(
+            'facebook' => '',
+            'twitter' => '',
+            'linkedin' => ''
+        );
+    }
+   
     $payment_keys = json_decode($user_data['payment_keys'], true);
-    $paypal_keys = $payment_keys['paypal'];
-    $stripe_keys = $payment_keys['stripe'];
-    $razorpay_keys = $payment_keys['razorpay'];
+    
+    // Ensure payment_keys is an array
+    if (!is_array($payment_keys)) {
+        $payment_keys = array();
+    }
+ 
+    // Handle empty payment_keys array to avoid warnings
+    $paypal_keys = isset($payment_keys['paypal']) && is_array($payment_keys['paypal']) ? $payment_keys['paypal'] : array();
+    $stripe_keys = isset($payment_keys['stripe']) && is_array($payment_keys['stripe']) ? $payment_keys['stripe'] : array();
+    $razorpay_keys = isset($payment_keys['razorpay']) && is_array($payment_keys['razorpay']) ? $payment_keys['razorpay'] : array();
 ?>
 <div class="row ">
     <div class="col-xl-12">
@@ -85,16 +103,70 @@
                                         </div>
 
                                         <div class="form-group row mb-3">
-                                            <label class="col-md-3 col-form-label" for="phone"><?php echo get_phrase('Phone'); ?></label>
+                                            <label class="col-md-3 col-form-label" for="address"><?php echo get_phrase('address'); ?></label>
                                             <div class="col-md-9">
-                                                <input type="text" class="form-control" value="<?php echo $user_data['phone']; ?>" id="phone" name="phone">
+                                                <input type="text" class="form-control" value="<?php echo $user_data['address']; ?>" id="address" name="address">
                                             </div>
                                         </div>
 
                                         <div class="form-group row mb-3">
-                                            <label class="col-md-3 col-form-label" for="address"><?php echo get_phrase('address'); ?></label>
+                                            <label class="col-md-3 col-form-label" for="location"><?php echo get_phrase('Location'); ?> <span class="required">*</span></label>
                                             <div class="col-md-9">
-                                                <input type="text" class="form-control" value="<?php echo $user_data['address']; ?>" id="address" name="address">
+                                                <select class="form-control" id="location" name="location" required>
+                                                    <option value=""><?php echo get_phrase('Select Location'); ?></option>
+                                                    <option value="PHC" <?php echo (isset($user_data['location']) && $user_data['location'] == 'PHC') ? 'selected' : ''; ?>>PHC</option>
+                                                    <option value="Sub-PHC" <?php echo (isset($user_data['location']) && $user_data['location'] == 'Sub-PHC') ? 'selected' : ''; ?>>Sub-PHC</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row mb-3">
+                                            <label class="col-md-3 col-form-label" for="designation"><?php echo get_phrase('Designation'); ?> <span class="required">*</span></label>
+                                            <div class="col-md-9">
+                                                <select class="form-control" id="designation" name="designation" required>
+                                                    <option value=""><?php echo get_phrase('Select Designation'); ?></option>
+                                                    <option value="ANM" <?php echo (isset($user_data['designation']) && $user_data['designation'] == 'ANM') ? 'selected' : ''; ?>>ANM</option>
+                                                    <option value="MPW" <?php echo (isset($user_data['designation']) && $user_data['designation'] == 'MPW') ? 'selected' : ''; ?>>MPW</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row mb-3">
+                                            <label class="col-md-3 col-form-label" for="phone"><?php echo get_phrase('Phone Number'); ?> <span class="required">*</span></label>
+                                            <div class="col-md-9">
+                                                <input type="tel" class="form-control" value="<?php echo isset($user_data['phone']) ? $user_data['phone'] : ''; ?>" id="phone" name="phone" pattern="[0-9]{10}" maxlength="10" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row mb-3">
+                                            <label class="col-md-3 col-form-label" for="city"><?php echo get_phrase('City'); ?> <span class="required">*</span></label>
+                                            <div class="col-md-9">
+                                                <input type="text" class="form-control" value="<?php echo isset($user_data['city']) ? $user_data['city'] : ''; ?>" id="city" name="city" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row mb-3">
+                                            <label class="col-md-3 col-form-label" for="state"><?php echo get_phrase('State'); ?> <span class="required">*</span></label>
+                                            <div class="col-md-9">
+                                                <select class="form-control" id="state" name="state" required>
+                                                    <option value=""><?php echo get_phrase('Select State'); ?></option>
+                                                    <?php 
+                                                    $this->load->helper('indian_states');
+                                                    $indian_states = get_indian_states();
+                                                    asort($indian_states);
+                                                    $selected_state = isset($user_data['state']) ? $user_data['state'] : '';
+                                                    foreach($indian_states as $code => $state): 
+                                                    ?>
+                                                        <option value="<?php echo html_escape($state); ?>" <?php echo ($selected_state == $state) ? 'selected' : ''; ?>><?php echo html_escape($state); ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row mb-3">
+                                            <label class="col-md-3 col-form-label" for="pincode"><?php echo get_phrase('Pincode'); ?> <span class="required">*</span></label>
+                                            <div class="col-md-9">
+                                                <input type="text" class="form-control" value="<?php echo isset($user_data['pincode']) ? $user_data['pincode'] : ''; ?>" id="pincode" name="pincode" pattern="[0-9]{6}" maxlength="6" required>
                                             </div>
                                         </div>
                                         
@@ -139,19 +211,19 @@
                                         <div class="form-group row mb-3">
                                             <label class="col-md-3 col-form-label" for="facebook_link"> <?php echo get_phrase('facebook'); ?></label>
                                             <div class="col-md-9">
-                                                <input type="text" id="facebook_link" name="facebook_link" class="form-control" value="<?php echo $social_links['facebook']; ?>">
+                                                <input type="text" id="facebook_link" name="facebook_link" class="form-control" value="<?php echo isset($social_links['facebook']) ? $social_links['facebook'] : ''; ?>">
                                             </div>
                                         </div>
                                         <div class="form-group row mb-3">
                                             <label class="col-md-3 col-form-label" for="twitter_link"><?php echo get_phrase('twitter'); ?></label>
                                             <div class="col-md-9">
-                                                <input type="text" id="twitter_link" name="twitter_link" class="form-control" value="<?php echo $social_links['twitter']; ?>">
+                                                <input type="text" id="twitter_link" name="twitter_link" class="form-control" value="<?php echo isset($social_links['twitter']) ? $social_links['twitter'] : ''; ?>">
                                             </div>
                                         </div>
                                         <div class="form-group row mb-3">
                                             <label class="col-md-3 col-form-label" for="linkedin_link"><?php echo get_phrase('linkedin'); ?></label>
                                             <div class="col-md-9">
-                                                <input type="text" id="linkedin_link" name="linkedin_link" class="form-control" value="<?php echo $social_links['linkedin']; ?>">
+                                                <input type="text" id="linkedin_link" name="linkedin_link" class="form-control" value="<?php echo isset($social_links['linkedin']) ? $social_links['linkedin'] : ''; ?>">
                                             </div>
                                         </div>
                                     </div> <!-- end col -->
@@ -165,12 +237,18 @@
                                             foreach($payment_gateways as $key => $payment_gateway):
                                             $keys = json_decode($payment_gateway['keys'], true);
                                             $user_keys = json_decode($user_data['payment_keys'], true);
+                                            
+                                            // Ensure user_keys is an array to avoid warnings
+                                            if (!is_array($user_keys)) {
+                                                $user_keys = array();
+                                            }
+                                            
                                             ?>
                                             <div class="<?php if($payment_gateway['status'] != 1 || !addon_status($payment_gateway['identifier']) && $payment_gateway['is_addon'] == 1) echo 'd-none'; ?>">
                                                 <h4><?php echo get_phrase($payment_gateway['title']); ?></h4>
                                                 <?php foreach($keys as $index => $value):
-                                                    if(array_key_exists($payment_gateway['identifier'], $user_keys)){
-                                                        if(array_key_exists($index, $user_keys[$payment_gateway['identifier']])){
+                                                    if(is_array($user_keys) && array_key_exists($payment_gateway['identifier'], $user_keys)){
+                                                        if(is_array($user_keys[$payment_gateway['identifier']]) && array_key_exists($index, $user_keys[$payment_gateway['identifier']])){
                                                             $value = $user_keys[$payment_gateway['identifier']][$index];
                                                         }else{
                                                             $value = '';

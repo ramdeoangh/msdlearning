@@ -20,13 +20,29 @@
                     <?php
                         $banner_title = site_phrase(get_frontend_settings('banner_title'));
                         $banner_title_arr = explode(' ', $banner_title);
+                        
+                        // Find the index of "from" to split the title
+                        $from_index = array_search('from', array_map('strtolower', $banner_title_arr));
+                        if($from_index === false) {
+                            // If "from" is not found, use the last word as before
+                            $from_index = count($banner_title_arr) - 1;
+                        }
                     ?>
                     <h1 class=" animate__animated  animate__fadeInUp" data-wow-duration="1000" data-wow-delay="500">
                         <?php
                         foreach($banner_title_arr as $key => $value){
-                            if($key == count($banner_title_arr) - 1){
-                                echo '<span class="d-inline-block">'.$value.'</span>';
+                            if($key == $from_index){
+                                // Add line break after "from" and start the green span
+                                echo $value.' <br><span class="d-inline-block">';
+                            }elseif($key > $from_index){
+                                // All words after "from" go inside the span
+                                if($key == count($banner_title_arr) - 1){
+                                    echo $value.'</span>';
+                                }else{
+                                    echo $value.' ';
+                                }
                             }else{
+                                // Words before "from" are displayed normally
                                 echo $value.' ';
                             }
                         }
@@ -595,7 +611,7 @@
 <?php endif; ?>
 
 
-<?php if(get_frontend_settings('top_instructor_section') == 0): ?>
+<?php if(get_frontend_settings('top_instructor_section') == -2): ?>
 <!---------  Expert Instructor Start ---------------->
 <?php $top_instructor_ids = $this->crud_model->get_top_instructor(10); ?>
 <?php if(count($top_instructor_ids) > 0): ?>

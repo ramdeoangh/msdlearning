@@ -491,6 +491,13 @@ class Home extends CI_Controller
         } elseif ($param1 == 'user_photo') {
             $page_data['page_name'] = "update_user_photo";
             $page_data['page_title'] = site_phrase('update_user_photo');
+        } elseif ($param1 == 'user_certificates') {
+            $page_data['page_name'] = "user_certificates";
+            $page_data['page_title'] = site_phrase('certificate');
+            // Get user's enrolled courses with details
+            $user_id = $this->session->userdata('user_id');
+            $enrolments = $this->user_model->my_courses($user_id)->result_array();
+            $page_data['enrolments'] = $enrolments;
         }
         $page_data['user_details'] = $this->user_model->get_user($this->session->userdata('user_id'));
         $this->load->view('frontend/' . get_frontend_settings('theme') . '/index', $page_data);
@@ -510,6 +517,105 @@ class Home extends CI_Controller
         $page_data['page_name'] = "instructor_following";
         $page_data['page_title'] = site_phrase("instructor_following");
         $this->load->view('frontend/' . get_frontend_settings('theme') . '/index', $page_data);
+    }
+
+    // Check certificate eligibility
+    public function check_certificate_eligibility() {
+        if ($this->session->userdata('user_login') != true) {
+            echo json_encode(array('status' => 'error', 'message' => get_phrase('please_login_first')));
+            return;
+        }
+
+        $course_id = $this->input->post('course_id');
+        $user_id = $this->session->userdata('user_id');
+        
+        // Check course progress
+        $watch_history = $this->crud_model->get_watch_histories($user_id, $course_id);
+        if($watch_history->num_rows() > 0) {
+            $course_progress = $watch_history->row('course_progress');
+            if($course_progress >= 100) {
+                // Check if certificate addon is enabled
+                if(addon_status('certificate')) {
+                    $this->load->model('addons/Certificate_model', 'certificate_model');
+                    // Check if certificate already exists, if not create it
+                    $certificate_check = $this->db->get_where('certificates', array(
+                        'course_id' => $course_id,
+                        'student_id' => $user_id
+                    ));
+                    
+                    if($certificate_check->num_rows() == 0) {
+                        $this->certificate_model->check_certificate_eligibility($course_id, $user_id);
+                    }
+                    
+                    echo json_encode(array('status' => 'success', 'message' => get_phrase('certificate_ready')));
+                } else {
+                    echo json_encode(array('status' => 'error', 'message' => get_phrase('certificate_addon_not_enabled')));
+                }
+            } else {
+                echo json_encode(array('status' => 'error', 'message' => get_phrase('course_is_not_completed_please_complete_first')));
+            }
+        } else {
+            echo json_encode(array('status' => 'error', 'message' => get_phrase('course_is_not_completed_please_complete_first')));
+        }
+    }
+
+    // Generate and download certificate
+    public function generate_and_download_certificate($course_id = "") {
+        if ($this->session->userdata('user_login') != true) {
+            redirect(site_url('home'), 'refresh');
+        }
+
+        $user_id = $this->session->userdata('user_id');
+        
+        // Check course progress
+        $watch_history = $this->crud_model->get_watch_histories($user_id, $course_id);
+        if($watch_history->num_rows() > 0) {
+            $course_progress = $watch_history->row('course_progress');
+            if($course_progress >= 100) {
+                // Get certificate identifier
+                $certificate_check = $this->db->get_where('certificates', array(
+                    'course_id' => $course_id,
+                    'student_id' => $user_id
+                ));
+                
+                if($certificate_check->num_rows() > 0) {
+                    $certificate_identifier = $certificate_check->row('shareable_url');
+                    redirect(site_url('certificate/'.$certificate_identifier), 'refresh');
+                } else {
+                    $this->session->set_flashdata('error_message', get_phrase('certificate_not_found'));
+                    redirect(site_url('home/profile/user_certificates'), 'refresh');
+                }
+            } else {
+                $this->session->set_flashdata('error_message', get_phrase('course_is_not_completed_please_complete_first'));
+                redirect(site_url('home/profile/user_certificates'), 'refresh');
+            }
+        } else {
+            $this->session->set_flashdata('error_message', get_phrase('course_is_not_completed_please_complete_first'));
+            redirect(site_url('home/profile/user_certificates'), 'refresh');
+        }
+    }
+
+    // Download certificate
+    public function download_certificate($certificate_identifier = "") {
+        if ($this->session->userdata('user_login') != true) {
+            redirect(site_url('home'), 'refresh');
+        }
+
+        if(!empty($certificate_identifier)) {
+            // Verify certificate belongs to current user
+            $user_id = $this->session->userdata('user_id');
+            $certificate_check = $this->db->get_where('certificates', array('shareable_url' => $certificate_identifier, 'student_id' => $user_id));
+            
+            if($certificate_check->num_rows() > 0) {
+                redirect(site_url('certificate/'.$certificate_identifier), 'refresh');
+            } else {
+                $this->session->set_flashdata('error_message', get_phrase('invalid_certificate'));
+                redirect(site_url('home/profile/user_certificates'), 'refresh');
+            }
+        } else {
+            $this->session->set_flashdata('error_message', get_phrase('invalid_certificate'));
+            redirect(site_url('home/profile/user_certificates'), 'refresh');
+        }
     }
 
 

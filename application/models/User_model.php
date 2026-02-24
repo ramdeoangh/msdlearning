@@ -52,6 +52,13 @@ class User_model extends CI_Model
             $data['biography'] = $this->input->post('biography');
             $data['phone'] = html_escape($this->input->post('phone'));
             $data['address'] = html_escape($this->input->post('address'));
+            
+            // New mandatory fields
+            $data['location'] = html_escape($this->input->post('location'));
+            $data['designation'] = html_escape($this->input->post('designation'));
+            $data['city'] = html_escape($this->input->post('city'));
+            $data['state'] = html_escape($this->input->post('state'));
+            $data['pincode'] = html_escape($this->input->post('pincode'));
 
             if ($is_admin) {
                 $data['role_id'] = 1;
@@ -195,6 +202,23 @@ class User_model extends CI_Model
 
             $data['phone'] = html_escape($this->input->post('phone'));
             $data['address'] = html_escape($this->input->post('address'));
+            
+            // New mandatory fields
+            if ($this->input->post('location') !== null) {
+                $data['location'] = html_escape($this->input->post('location'));
+            }
+            if ($this->input->post('designation') !== null) {
+                $data['designation'] = html_escape($this->input->post('designation'));
+            }
+            if ($this->input->post('city') !== null) {
+                $data['city'] = html_escape($this->input->post('city'));
+            }
+            if ($this->input->post('state') !== null) {
+                $data['state'] = html_escape($this->input->post('state'));
+            }
+            if ($this->input->post('pincode') !== null) {
+                $data['pincode'] = html_escape($this->input->post('pincode'));
+            }
 
             if (isset($_FILES['user_image']) && $_FILES['user_image']['name'] != "") {
                 unlink('uploads/user_image/' . $this->db->get_where('users', array('id' => $user_id))->row('image') . '.jpg');

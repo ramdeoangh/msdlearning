@@ -2,6 +2,11 @@
 <?php
     $qr_code = 'uploads/certificates/qrcodes/'. $certificate_identifier.'.jpg';
     if(!file_exists($qr_code)){
+        // Create directory if it doesn't exist
+        $qr_code_dir = dirname($qr_code);
+        if (!file_exists($qr_code_dir)) {
+            mkdir($qr_code_dir, 0755, true);
+        }
         include APPPATH.'libraries/phpqrcode/qrlib.php';
         QRcode::png(site_url('certificate/'.$certificate_identifier), $qr_code, QR_ECLEVEL_L, 3, 4);
     }

@@ -124,6 +124,11 @@ $unreaded_message = $this->db->get('message')->num_rows();
             <?php echo get_phrase('Instructor Followings'); ?>
         </a>
 
+        <a class="btn-profile-menu <?php if($page_name == 'user_certificates') echo 'active'; ?>" href="<?php echo site_url('home/profile/user_certificates'); ?>">
+            <i class="fas fa-certificate me-2"></i>
+            <?php echo get_phrase('Certificate'); ?>
+        </a>
+
         <a class="btn-profile-menu <?php if($page_name == 'user_credentials') echo 'active'; ?>" href="<?php echo site_url('home/profile/user_credentials'); ?>">
             <i class="fas fa-key me-2"></i>
             <?php echo get_phrase('Account'); ?>

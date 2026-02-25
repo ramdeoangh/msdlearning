@@ -52,12 +52,17 @@ class Login extends CI_Controller
             redirect(site_url('login'), 'refresh');
         }
 
-        $email = $this->input->post('email');
+        $identity = trim($this->input->post('email'));
         $password = $this->input->post('password');
-        $credential = array('email' => $email, 'password' => sha1($password), 'status' => 1);
 
-        // Checking login credential for admin
-        $query = $this->db->get_where('users', $credential);
+        // Allow login with email or phone using same input field
+        $this->db->group_start();
+        $this->db->where('email', $identity);
+        $this->db->or_where('phone', $identity);
+        $this->db->group_end();
+        $this->db->where('password', sha1($password));
+        $this->db->where('status', 1);
+        $query = $this->db->get('users');
 
         if ($query->num_rows() > 0) {
             $row = $query->row();
@@ -275,10 +280,16 @@ class Login extends CI_Controller
             $this->session->set_flashdata('error_message', get_phrase('recaptcha_verification_failed'));
             redirect(site_url('login'), 'refresh');
         }
-        $email = $this->input->post('email');
-        $query = $this->db->get_where('users', array('email' => $email, 'status' => 1));
+        $identity = trim($this->input->post('email'));
+        $this->db->group_start();
+        $this->db->where('email', $identity);
+        $this->db->or_where('phone', $identity);
+        $this->db->group_end();
+        $this->db->where('status', 1);
+        $query = $this->db->get('users');
         if ($query->num_rows() > 0) {
-            $this->crud_model->forgot_password();
+            $email = $query->row('email');
+            $this->crud_model->forgot_password($email);
             redirect(site_url('login'), 'refresh');
         } else {
             $this->session->set_flashdata('error_message', get_phrase('user_not_found'));

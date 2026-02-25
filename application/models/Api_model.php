@@ -303,8 +303,14 @@ class Api_model extends CI_Model
 	public function login_get()
 	{
 		$userdata = array();
-		$credential = array('email' => $_GET['email'], 'password' => sha1($_GET['password']), 'status' => 1);
-		$query = $this->db->get_where('users', $credential);
+		$identity = trim($_GET['email']);
+		$this->db->group_start();
+		$this->db->where('email', $identity);
+		$this->db->or_where('phone', $identity);
+		$this->db->group_end();
+		$this->db->where('password', sha1($_GET['password']));
+		$this->db->where('status', 1);
+		$query = $this->db->get('users');
 		if ($query->num_rows() > 0) {
 			$row = $query->row_array();
 
@@ -1059,8 +1065,10 @@ class Api_model extends CI_Model
 	}
 	
 
-	function forgot_password_post(){
-    	$email = $this->input->post('email');
+function forgot_password_post($email = ""){
+        if (empty($email)) {
+    	    $email = $this->input->post('email');
+        }
         $verification_code = str_replace('=', '', base64_encode($email.'_Uh6#@#6hU_'.rand(111111, 9999999)));
         $this->db->where('email', $email);
         $this->db->update('users', array('verification_code' => $verification_code, 'last_modified' => time()));

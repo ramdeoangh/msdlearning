@@ -4490,9 +4490,11 @@ class Crud_model extends CI_Model
     }
 
 
-    function forgot_password()
+    function forgot_password($email = "")
     {
-        $email = $this->input->post('email');
+        if (empty($email)) {
+            $email = $this->input->post('email');
+        }
 
         $solid_email = str_replace('@', '__', $email);
         $verification_code = str_replace('=', '', base64_encode($solid_email . '--' . rand(1111, 9999)));

@@ -70,10 +70,16 @@ class Api_instructor extends REST_Controller {
   public function forgot_password_post(){
     $response = array();
     if(isset($_POST['email']) && !empty($_POST['email'])){
-      $email = $this->input->post('email');
-      $query = $this->db->get_where('users', array('email' => $email, 'status' => 1));
+      $identity = trim($this->input->post('email'));
+      $this->db->group_start();
+      $this->db->where('email', $identity);
+      $this->db->or_where('phone', $identity);
+      $this->db->group_end();
+      $this->db->where('status', 1);
+      $query = $this->db->get('users');
       if ($query->num_rows() > 0) {
-          $this->api_instructor_model->forgot_password_post();
+          $email = $query->row('email');
+          $this->api_instructor_model->forgot_password_post($email);
           $response['message'] = 'Successfully sent the verification link to your inbox';
           $response['status'] = 200;
           $response['validity'] = true;

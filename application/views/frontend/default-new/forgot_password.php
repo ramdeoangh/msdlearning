@@ -16,10 +16,10 @@
 
                     <form action="<?php echo site_url('login/forgot_password/frontend'); ?>" method="post" id="forgot-password">
                         <div class="mb-3">
-                            <h5><?php echo get_phrase('Your email'); ?></h5>
+                            <h5><?php echo get_phrase('Your email or mobile'); ?></h5>
                             <div class="position-relative">
                                 <i class="fa-solid fa-user"></i>
-                                <input class="form-control" id="email" type="email" name="email" placeholder="<?php echo get_phrase('Enter your email'); ?>">
+                                <input class="form-control" id="email" type="text" name="email" placeholder="<?php echo get_phrase('Enter your email or mobile number'); ?>">
                             </div>
                         </div>
                         <?php if(get_frontend_settings('recaptcha_status')): ?>

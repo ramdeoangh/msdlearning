@@ -50,7 +50,7 @@
                         </div>
                         <?php endif; ?>
                     </form>
-                    <?php if(get_settings('public_signup') == 'enable'): ?>      
+                    <?php if(false && get_settings('public_signup') == 'enable'): ?>      
                     <div class="another text-center">
                         <p>
                             <?php echo get_phrase('Don`t have an account?') ?>

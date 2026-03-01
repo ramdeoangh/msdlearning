@@ -17,7 +17,7 @@
         <div class="offcanvas-header bg-light">
           <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
           <div class="offcanves-btn">
-             <?php if(get_settings('public_signup') == 'enable'): ?>  
+             <?php if(false && get_settings('public_signup') == 'enable'): ?>  
               <a href="<?php echo site_url('sign_up'); ?>" class="signUp-btn"><?php echo get_phrase('Sign Up'); ?></a>
              <?php endif;?>
             <a href="<?php echo site_url('login'); ?>" class="logIn-btn"><?php echo get_phrase('Login'); ?></a>

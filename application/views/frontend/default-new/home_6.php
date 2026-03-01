@@ -39,7 +39,7 @@
           </h4>
           <p class="info  animate__animated  animate__fadeInUp " data-wow-duration="1000" data-wow-delay="500"><?php echo site_phrase(get_frontend_settings('banner_sub_title')); ?></p>
 
-           <?php if(get_settings('public_signup') == 'enable'): ?>  
+           <?php if(false && get_settings('public_signup') == 'enable'): ?>  
           <a href="<?php echo site_url('sign_up'); ?>" class="btn-six  animate__animated  animate__fadeInUp " data-wow-duration="1000" data-wow-delay="500"><?php echo get_phrase('Join for free'); ?></a>
              <?php endif;?>
         </div>
@@ -695,7 +695,7 @@
                                
                                 <h1><?php echo site_phrase('join_now_to_start_learning'); ?></h1>
                                 <p><?php echo site_phrase('Learn from our quality instructors!')?> </p>
-                                 <?php if(get_settings('public_signup') == 'enable'): ?>  
+                                 <?php if(false && get_settings('public_signup') == 'enable'): ?>  
                                     <a href="<?php echo site_url('sign_up'); ?>"><?php echo site_phrase('get_started'); ?></a>
                                    <?php endif;?>
                             </div>
@@ -714,7 +714,7 @@
                                 <div class="student-body-text">
                                     <h1><?php echo site_phrase('become_a_new_instructor'); ?></h1>
                                     <p><?php echo site_phrase('Teach_thousands_of_students_and_earn_money!')?> </p>
-                                       <?php if(get_settings('public_signup') == 'enable'): ?>  
+                                       <?php if(false && get_settings('public_signup') == 'enable'): ?>  
                                             <?php if($this->session->userdata('user_id')): ?>
                                               <a  href="<?php echo site_url('user/become_an_instructor'); ?>"><?php echo site_phrase('join_now'); ?></a>
                                               <?php else: ?>

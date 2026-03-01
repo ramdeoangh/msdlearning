@@ -38,7 +38,7 @@
                     <?php endif; ?>
                     <li> <a href="<?php echo site_url('blog'); ?>"><?php echo site_phrase('blog'); ?></a></li>
                     <li><a href="<?php echo site_url('home/courses'); ?>"><?php echo site_phrase('all_courses'); ?></a></li>
-                    <?php if(get_settings('public_signup') == 'enable'): ?>  
+                    <?php if(false && get_settings('public_signup') == 'enable'): ?>  
                     <li><a href="<?php echo site_url('sign_up'); ?>"><?php echo site_phrase('sign_up'); ?></a></li>
                      <?php endif;?>
                     <?php $custom_page_menus = $this->crud_model->get_custom_pages('', 'footer'); ?>

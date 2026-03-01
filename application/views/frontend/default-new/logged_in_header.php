@@ -167,7 +167,9 @@
                             </div>
                         </li>
                         <li><a href="<?php echo site_url('login'); ?>"  class="sign-in-log">Login</a></li>
+                        <?php if(false): ?>
                         <li><a href="<?php echo site_url('sign_up'); ?>" class="sign-up-btn">Sign Up</a></li>
+                        <?php endif; ?>
                     </ul>    
                 </div> 
             </div>
@@ -186,7 +188,9 @@
                 <div class="offcanvas-header">
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
                     <div class="offcanves-btn">
+                            <?php if(false): ?>
                             <a href="<?php echo site_url('sign_up'); ?>" class="signUp-btn"><?php echo site_phrase('sign_up')?></a>
+                            <?php endif; ?>
                         <a href="<?php echo site_url('login'); ?>"  class="logIn-btn"><?php echo site_phrase('Login')?></a>
                         
                     </div>

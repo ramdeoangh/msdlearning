@@ -869,7 +869,7 @@
                                 <!-- <img loading="lazy" src="<?php echo base_url('assets/frontend/default-new/image/2.png')?>"> -->
                                 <h1><?php echo site_phrase('Learn from our quality instructors!'); ?></h1>
                                 <p><?php echo site_phrase('Teach_thousands_of_students_and_earn_money!')?> </p>
-                                   <?php if(get_settings('public_signup') == 'enable'): ?>  
+                                  <?php if(false && get_settings('public_signup') == 'enable'): ?>  
                                 <a href="<?php echo site_url('sign_up'); ?>"><?php echo site_phrase('get_started'); ?></a>
                                  <?php endif;?>
                             </div>
@@ -889,7 +889,7 @@
                                   <!-- <img loading="lazy" src="<?php echo base_url('assets/frontend/default-new/image/2.png')?>"> -->
                                     <h1><?php echo site_phrase('become_a_new_instructor'); ?></h1>
                                     <p><?php echo site_phrase('Teach_thousands_of_students_and_earn_money!')?> </p>
-                                      <?php if(get_settings('public_signup') == 'enable'): ?>  
+                                      <?php if(false && get_settings('public_signup') == 'enable'): ?>  
                                             <?php if($this->session->userdata('user_id')): ?>
                                             <a  href="<?php echo site_url('user/become_an_instructor'); ?>"><?php echo site_phrase('join_now'); ?></a>
                                             <?php else: ?>

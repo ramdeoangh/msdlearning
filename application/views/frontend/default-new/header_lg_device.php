@@ -262,7 +262,7 @@
 
         <?php if(!$user_id): ?>
           <a href="<?php echo site_url('login'); ?>" class="ms-3"> <?php echo get_phrase('Login'); ?></a>
-          <?php if(get_settings('public_signup') == 'enable'): ?>  
+          <?php if(false && get_settings('public_signup') == 'enable'): ?>  
             <a href="<?php echo site_url('sign_up'); ?>" class="ms-3 text-capitalize ctBtn" style="min-width: 70px"> <?php echo get_phrase('Join Now'); ?></a>
           <?php endif;?>
         <?php endif; ?>
